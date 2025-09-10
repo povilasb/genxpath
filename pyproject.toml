@@ -1,0 +1,24 @@
+[project]
+name = "genxpath"
+version = "0.1.0"
+description = "XPath generator"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "parsel>=1.10.0",
+    "prompt-toolkit>=3.0.52",
+    "pydantic>=2.11.7",
+    "rich>=14.1.0",
+    "rnet>=3.0.0rc5",
+    "textual>=6.1.0",
+    "typer>=0.17.4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

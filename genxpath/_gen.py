@@ -1,23 +1,22 @@
 from parsel import Selector
-from pydantic import BaseModel
 from dataclasses import dataclass
 
 
-def find_xpaths(model: BaseModel, html_doc: str) -> dict[str, list[str]]:
+def find_xpaths(model: dict[str, str], html_doc: str) -> dict[str, list[str]]:
     """For all model fields finds all possible XPaths to the value."""
     field_xpaths: dict[str, list[str]] = {}
 
     doc = Selector(text=html_doc)
-    for field in model.__class__.model_fields.keys():
-        if sample_value := getattr(model, field):
-            field_xpaths[field] = _find_xpaths_for(sample_value, doc)
+    for field, sample_value in model.items():
+        if sample_value:
+            field_xpaths[field] = find_xpaths_for(sample_value, doc)
         else:
             field_xpaths[field] = []
 
     return field_xpaths
 
 
-def _find_xpaths_for(value: str, doc: Selector) -> list[str]:
+def find_xpaths_for(value: str, doc: Selector) -> list[str]:
     """Value may be in a text node or an attribute - find an xpath to it."""
     xpaths: list[str] = []
 

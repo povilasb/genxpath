@@ -1,18 +1,15 @@
-from pydantic import BaseModel
 import typer
 from parsel import Selector
 from pathlib import Path
-from genxpath._gen import find_xpaths
-from genxpath._cache import Cache
-from rnet.blocking import Client as RnetClient
-from rnet.emulation import EmulationOption
+from genxpath._gen import find_xpaths, find_xpaths_for
 import rich
 from rich.console import Console
 from rich.logging import RichHandler
-from datetime import timedelta
 import logging
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
+from cache3 import DiskCache
+from genxpath._io import http_get
 
 
 logging.basicConfig(
@@ -23,34 +20,28 @@ logging.basicConfig(
 )
 
 
-class Product(BaseModel):
-    name: str | None = None
-    price: str | None = None
-    views: str | None = None
-
-
 def main(url: str):
-    # TODO: OSS cache lib?
-    cache = Cache.load("cache.json")
+    cache = DiskCache("cache")
 
     if url.startswith("https://"):
-        html_doc = _http_get(url, cache)
+        html_doc = http_get(url, cache)
     else:
         html_doc = Path(url).read_text()
 
     product = find_xpaths(
-        Product(
-            name="Trek Fx 1",
-            price="300 €",
-            views="17",
-        ),
+        {
+            "name": "Parduodamas Trek dviratis",
+            "price": "299 €",
+            "views": "3",
+        },
         html_doc,
     )
     rich.print(product)
 
-    _xpath_shell(html_doc)
+    xpaths = find_xpaths_for("Parduodamas Trek dviratis", Selector(text=html_doc))
+    rich.print(xpaths)
 
-    # TODO: minimize xpath from full path
+    _xpath_shell(html_doc)
 
 
 def _xpath_shell(html_doc: str):
@@ -67,21 +58,6 @@ def _xpath_shell(html_doc: str):
                 rich.print(f"{i}: {el.get()}")
         except ValueError:
             logging.error(f"Invalid XPath: {xpath}")
-
-
-def _http_get(url: str, cache: Cache) -> str:
-    if cached := cache.get(url):
-        logging.info(f"Cache hit for {url}")
-        return cached
-
-    http_client = RnetClient(emulation=EmulationOption.random(), allow_redirects=True)
-    resp = http_client.get(url)
-    html_doc = resp.text()
-    cache.set(url, html_doc, timedelta(days=1))
-    logging.info(f"Cached {url}")
-
-    assert resp.status.as_int() == 200
-    return html_doc
 
 
 if __name__ == "__main__":

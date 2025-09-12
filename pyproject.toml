@@ -5,6 +5,7 @@ description = "XPath generator"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "cache3>=0.4.3",
     "parsel>=1.10.0",
     "prompt-toolkit>=3.0.52",
     "pydantic>=2.11.7",

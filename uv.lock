@@ -12,6 +12,15 @@ wheels = [
 ]
 
 [[package]]
+name = "cache3"
+version = "0.4.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/2b/69d1470fae42c30180d01d23304e41cf668539c127820ce710fb66a27af6/cache3-0.4.3.tar.gz", hash = "sha256:085aae7898ce24fa88fdfe1e54ae4dee57acc182eeb9c0056799043737ad7407", size = 20117, upload-time = "2023-05-04T17:50:47.955Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9a/40/dd5de3f2ca6c80b0ef7f9753f1eb960bd78c5822b6d4720fbbf96f98623e/cache3-0.4.3-py3-none-any.whl", hash = "sha256:17320e1bf5637f6eb07738e47663067845a9d64a8005026ab40a55c3cd96fa3a", size = 16072, upload-time = "2023-05-04T17:50:45.782Z" },
+]
+
+[[package]]
 name = "click"
 version = "8.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -46,6 +55,7 @@ name = "genxpath"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cache3" },
     { name = "parsel" },
     { name = "prompt-toolkit" },
     { name = "pydantic" },
@@ -62,6 +72,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cache3", specifier = ">=0.4.3" },
     { name = "parsel", specifier = ">=1.10.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
     { name = "pydantic", specifier = ">=2.11.7" },

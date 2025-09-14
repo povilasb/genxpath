@@ -37,6 +37,26 @@ def find_xpaths_for(value: str, doc: Selector) -> list[str]:
     return xpaths
 
 
+def minimize_xpath(doc: Selector | str, xpath: str) -> str:
+    """Try to minimize the XPath for a given element."""
+    if isinstance(doc, str):
+        doc = Selector(text=doc)
+
+    if xpath.endswith("/text()"):
+        xpath = xpath[: -len("/text()")]
+        text_nodes = True
+    else:
+        text_nodes = False
+
+    if not (element := next(iter(doc.xpath(xpath)), None)):
+        return xpath
+
+    shorter_xpath = _shortest_unique_xpath(doc, element)
+    if text_nodes:
+        return f"{shorter_xpath}/text()"
+    return shorter_xpath
+
+
 @dataclass
 class _ValueSelector:
     value: str

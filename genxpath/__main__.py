@@ -1,13 +1,14 @@
 import typer
 from parsel import Selector
 from pathlib import Path
-from genxpath._gen import find_xpaths, find_xpaths_for
+from genxpath._gen import find_xpaths_for, minimize_xpath
 import rich
 from rich.console import Console
 from rich.logging import RichHandler
 import logging
 from prompt_toolkit import PromptSession
 from prompt_toolkit.history import InMemoryHistory
+from prompt_toolkit.completion import WordCompleter
 from cache3 import DiskCache
 from genxpath._io import http_get
 
@@ -28,36 +29,50 @@ def main(url: str):
     else:
         html_doc = Path(url).read_text()
 
-    product = find_xpaths(
-        {
-            "name": "Parduodamas Trek dviratis",
-            "price": "299 €",
-            "views": "3",
-        },
-        html_doc,
-    )
-    rich.print(product)
-
-    xpaths = find_xpaths_for("Parduodamas Trek dviratis", Selector(text=html_doc))
-    rich.print(xpaths)
-
-    _xpath_shell(html_doc)
+    _run_shell(html_doc)
 
 
-def _xpath_shell(html_doc: str):
+def _run_shell(html_doc: str):
     doc = Selector(text=html_doc)
 
+    print("HELP:")
+    print("   q - query xpath")
+    print("   m - minimize xpath")
+    print("   f - find xpath by value")
+    print("   d - print loaded document")
+
     history = InMemoryHistory()
-    shell_session = PromptSession(history=history)
+    auto_complete = WordCompleter(["q", "m", "f"])
+    shell_session = PromptSession[str](history=history, completer=auto_complete)
 
     while True:
-        xpath = shell_session.prompt("xpath: ")
-        try:
-            elements = doc.xpath(xpath)
-            for i, el in enumerate(elements):
-                rich.print(f"{i}: {el.get()}")
-        except ValueError:
-            logging.error(f"Invalid XPath: {xpath}")
+        prompt = shell_session.prompt("> ")
+        if prompt == "d":
+            cmd = "d"
+        else:
+            cmd, args = prompt.split(maxsplit=1)
+
+        match cmd:
+            case "q":
+                _query_xpath(doc, args)
+            case "m":
+                print(minimize_xpath(doc, args))
+            case "f":
+                for xpath in find_xpaths_for(args, doc):
+                    print(xpath)
+            case "d":
+                rich.print(html_doc)
+            case _:
+                logging.error(f"Invalid command: {cmd}")
+
+
+def _query_xpath(doc: Selector, xpath: str):
+    try:
+        elements = doc.xpath(xpath)
+        for i, el in enumerate(elements):
+            rich.print(f"{i}: {el.get()}")
+    except ValueError:
+        logging.error(f"Invalid XPath: {xpath}")
 
 
 if __name__ == "__main__":

@@ -22,10 +22,10 @@ uv sync
 
 ```bash
 # Load from URL
-genxpath https://example.com
+uv run python -m genxpath https://example.com
 
 # Load from local file
-genxpath path/to/file.html
+uv run python -m genxpath path/to/file.html
 ```
 
 ### Interactive Commands
@@ -57,6 +57,15 @@ HELP:
 > m //html/body/div[1]/h1
 //h1
 ```
+
+## GUI
+
+```shell
+uv run python -m genxpath.gui
+```
+
+![GUI](gui.png)
+
 
 ## Architecture
 

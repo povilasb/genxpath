@@ -2,6 +2,12 @@
 
 An interactive XPath generator and testing tool for web scraping and HTML parsing.
 
+```shell
+uv run python -m genxpath.gui
+```
+
+![GUI](gui.png)
+
 ## Features
 
 - **Interactive Shell**: Query, test, and minimize XPath expressions
@@ -57,15 +63,6 @@ HELP:
 > m //html/body/div[1]/h1
 //h1
 ```
-
-## GUI
-
-```shell
-uv run python -m genxpath.gui
-```
-
-![GUI](gui.png)
-
 
 ## Architecture
 

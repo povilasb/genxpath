@@ -3,6 +3,7 @@
 An interactive XPath generator and testing tool for web scraping and HTML parsing.
 
 ```shell
+uv sync
 uv run python -m genxpath.gui
 ```
 
@@ -15,12 +16,6 @@ uv run python -m genxpath.gui
 - **XPath Minimization**: Optimize XPath expressions to their shortest unique form
 - **Multiple Input Sources**: Works with local HTML files or remote URLs
 - **Caching**: Built-in caching for remote content to speed up development
-
-## Installation
-
-```bash
-uv sync
-```
 
 ## Usage
 

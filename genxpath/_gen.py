@@ -1,4 +1,4 @@
-from parsel import Selector
+from parsel import Selector, SelectorList
 from dataclasses import dataclass
 
 
@@ -101,7 +101,7 @@ def _shortest_unique_xpath(doc: Selector, element: Selector) -> str:
     return full_path
 
 
-def _xpath_by_attr(doc: Selector, element: Selector) -> str | None:
+def _xpath_by_attr(doc: Selector, element: Selector | SelectorList) -> str | None:
     # 1. Prefer unique ID
     el_id = element.attrib.get("id")
     if el_id and len(doc.xpath(f"//*[@id='{el_id}']")) == 1:

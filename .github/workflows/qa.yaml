@@ -11,6 +11,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.13"]
+        task:
+          - lint
+          - check_types
+          - test
 
     steps:
     - uses: actions/checkout@v5
@@ -29,10 +33,5 @@ jobs:
       run: |
         uv sync --dev
 
-    - name: Run type checks
-      run: |
-        uv run task check_types
-
-    - name: Run tests
-      run: |
-        uv run task test
+    - name: Run - {{ matrix['task'] }}
+      run: uv run task ${{ matrix['task'] }}

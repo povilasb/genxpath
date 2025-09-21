@@ -49,6 +49,7 @@ def _run_shell(html_doc: str):
         prompt = shell_session.prompt("> ")
         if prompt == "d":
             cmd = "d"
+            args = ""
         else:
             cmd, args = prompt.split(maxsplit=1)
 

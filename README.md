@@ -1,6 +1,6 @@
 # About
 
-An interactive XPath generator and testing tool for web scraping and HTML parsing.
+An interactive XPath generator and testing tool for Web scraping and HTML parsing.
 
 ```shell
 uv sync

@@ -18,10 +18,16 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.405",
     "pytest>=8.4.2",
+    "taskipy>=1.14.1",
     "ty>=0.0.1a20",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.taskipy.tasks]
+test = "pytest tests"
+check_types = "pyright genxpath tests"

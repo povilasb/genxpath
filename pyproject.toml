@@ -12,12 +12,14 @@ dependencies = [
     "rich>=14.1.0",
     "rnet>=3.0.0rc5",
     "textual>=6.1.0",
+    "textual-serve>=1.1.2",
     "typer>=0.17.4",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "ty>=0.0.1a20",
 ]
 
 [build-system]

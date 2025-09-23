@@ -1,4 +1,6 @@
 import typing as t
+import asyncio
+
 from rich.text import Text
 from textual.app import App, ComposeResult
 from textual.widgets import (
@@ -9,6 +11,7 @@ from textual.widgets import (
     Markdown,
     Button,
     DataTable,
+    Label,
 )
 from textual.message import Message
 from textual.containers import VerticalScroll, Horizontal, Vertical
@@ -18,6 +21,7 @@ from parsel import Selector
 
 from genxpath._io import http_get
 from genxpath._gen import find_xpaths_for, minimize_xpath
+from genxpath._browser import WebBrowser
 
 
 class FindValueInput(Input):
@@ -127,19 +131,19 @@ class Controls(Static):
         elif event.input.id == "value-input" and event.value:
             self._find_xpaths(event.value)
 
+    def load_html(self, html: str) -> None:
+        self.loaded_doc = Selector(text=html)
+        self.post_message(self.LoadedHtml(html))
+
     def _fetch_html(self, url: str) -> None:
         self.post_message(self.LoadingUrl(url))
 
         try:
             html_doc = http_get(url, self._cache)
+            self.load_html(html_doc)
+            self._cache.set("last_url_loaded", url)
         except Exception as e:
             self.notify("Error fetching HTML: " + str(e), markup=False)
-            return
-
-        self.loaded_doc = Selector(text=html_doc)
-        self.post_message(self.LoadedHtml(html_doc))
-
-        self._cache.set("last_url_loaded", url)
 
     def _find_xpaths(self, value: str) -> None:
         if not self.loaded_doc:
@@ -226,9 +230,10 @@ class XpathGenerator(App):
     }
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, open_web_browser: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self._web_browser = WebBrowser() if open_web_browser else None
         self._cache = DiskCache("cache")
         self.theme = "solarized-light"
 
@@ -240,7 +245,44 @@ class XpathGenerator(App):
                 yield Controls(self._cache)
                 yield ViewHtml()
 
+            self._xpath_from_browser = Label("")
+            yield self._xpath_from_browser
+
         yield Footer()
+
+    async def on_mount(self) -> None:
+        if self._web_browser:
+            await self._web_browser.start()
+
+        self.run_worker(self._on_js_events)
+
+    async def _on_js_events(self) -> None:
+        """Listen to JavaScript events from the web browser and send them to the app."""
+        if not self._web_browser:
+            return
+
+        while True:
+            try:
+                event = await self._web_browser.events.get()
+                match event["event"]:
+                    case "html_loaded":
+                        self.query_one(Controls).load_html(event["html"])
+                    case "element_hover":
+                        min_xpath = event["xpath"]
+
+                        # TODO: move loaded_doc ownership to the App instance?
+                        if doc := self.query_one(Controls).loaded_doc:
+                            try:
+                                min_xpath = minimize_xpath(doc, event["xpath"])
+                            except ValueError:
+                                ...
+
+                        self._xpath_from_browser.update(
+                            Text(f"{event['xpath']} -> {min_xpath}")
+                        )
+
+            except asyncio.CancelledError:
+                break
 
     def on_controls_loading_url(self, event: Controls.LoadingUrl) -> None:
         self.query_one(ViewHtml).update_html("Loading...")
@@ -263,6 +305,7 @@ class XpathGenerator(App):
         )
 
 
+app = XpathGenerator(open_web_browser=True)
+
 if __name__ == "__main__":
-    app = XpathGenerator()
     app.run()

@@ -1,5 +1,4 @@
 import typer
-import asyncio
 from parsel import Selector
 from pathlib import Path
 import rich
@@ -43,7 +42,7 @@ def _run_shell(html_doc: str):
     shell_session = PromptSession[str](history=history, completer=auto_complete)
 
     while True:
-        prompt = shell_session.prompt_async("> ")
+        prompt = shell_session.prompt("> ")
         if prompt == "d":
             cmd = "d"
             args = ""

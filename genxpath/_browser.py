@@ -4,7 +4,7 @@ from asyncio import Queue
 import typing as t
 from typing import TypedDict
 
-from playwright.async_api import async_playwright, Page
+from patchright.async_api import async_playwright, Page
 
 # Some JavaScript utils to be run on a Web browser to communicate with Python.
 _JS_INIT = """
@@ -69,7 +69,7 @@ class WebBrowser:
 
     async def start(self) -> None:
         self._playwright = await async_playwright().__aenter__()
-        self._browser = await self._playwright.firefox.launch(headless=False)
+        self._browser = await self._playwright.chromium.launch(headless=False)
         self._page = await self._browser.new_page()
         self._page.on("load", lambda page: page.evaluate(_JS_INIT))
 
